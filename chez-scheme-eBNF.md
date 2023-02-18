@@ -1,48 +1,10 @@
-# Revised 6 Report on the Algorithmic Language Scheme - Extended BNF
+# Chez Scheme - Extended BNF
 
 ## Preface
 
-See http://www.r6rs.org/final/r6rs.pdf
+See https://cisco.github.io/ChezScheme/csug9.5/intro.html#./intro:h1
 
-> The syntax of Scheme code is organized in three levels:
-> 1. the `lexical syntax` that describes how a program text is split into a sequence of lexemes,
-> 2. the `datum syntax`, formulated in terms of the lexical syntax, that structures the lexeme sequence as a sequence of `syntactic data`, where a syntactic datum is a recursively structured entity,
-> 3. the `program syntax` formulated in terms of the read syntax, imposing further structure and assigning meaning to syntactic data.
-
-The three levels above are displayed in reverse order below. Content was copied from the report and reformatted for clarity.
-
-### Notation (4.1)
-
-The report uses extended BNF:
-
-```
-〈Empty〉               = stands for the empty string.
-〈thing〉*              = zero or more occurrences of 〈thing〉
-〈thing〉+              = means at least one 〈thing〉.
-```
-
-Some non-terminal names refer to the Unicode scalar values of the same name:
-
-```
-〈character tabulation〉= (U+0009)
-〈linefeed〉            = (U+000A)
-〈carriage return〉     = (U+000D)
-〈line tabulation〉     = (U+000B)
-〈form feed〉           = (U+000C)
-〈carriage return〉     = (U+000D)
-〈space〉               = (U+0020)
-〈next line〉           = (U+0085)
-〈line separator〉      = (U+2028)
-〈paragraph separator〉 = (U+2029)
-```
-
-For clarity, we use the following non-terminal names to refer to specific characters that are otherwise a part of BNF syntax:
-```
-〈plus〉 = stands for a literal plus character (e.g. `+`)
-〈minus〉= stands for a literal minus character (e.g. `-`)
-〈dot〉  = stands for a literal period character (e.g. `.`)
-〈pipe〉 = stands for a literal period character (e.g. `|`)
-```
+This file duplicates `r6rs-eBNF.md` but modifies the syntax to include Chez Scheme's changes.
 
 ## Program Syntax
 
@@ -225,6 +187,14 @@ Note: while the lexical and datum syntax have formal accounts, the program synta
   | ; 
   | #
   | 〈whitespace〉
+  | 〈chez scheme delimiter〉
+
+〈chez scheme delimiter〉 → 
+    {
+  | }
+  | '
+  | `
+  | ,
 
 〈whitespace〉 → 
     〈character tabulation〉
@@ -248,6 +218,12 @@ Note: while the lexical and datum syntax have formal accounts, the program synta
   | 〈nested comment〉
   | #; 〈interlexeme space〉 〈datum〉
   | #!r6rs
+  | 〈chez scheme comment directives〉
+
+〈chez scheme comment directives〉 → 
+  | #!chezscheme
+  | #!fold-case
+  | #!no-fold-case
 
 〈nested comment〉 → 
     #〈pipe〉 〈comment text〉〈comment cont〉* 〈pipe〉#
@@ -273,6 +249,18 @@ Note: while the lexical and datum syntax have formal accounts, the program synta
     〈constituent〉 
   | 〈special initial〉
   | 〈inline hex escape〉
+  | 〈chez scheme number-like initial〉
+  | 〈chez scheme bar escapes〉
+
+〈chez scheme number-like initial〉 → 
+    〈digit〉+ 〈subsequent〉*
+  |〈dot〉+ 〈subsequent〉*
+  |〈plus〉+ 〈subsequent〉*
+  |〈minus〉+ 〈subsequent〉*
+
+〈chez scheme bar escapes〉 → 
+    \ 〈any char that is not `x`〉
+  | 〈pipe〉〈any character that is not 〈pipe〉〉+ 〈pipe〉
 
 〈letter〉 → 
     a | b | c | ... | z
@@ -328,17 +316,28 @@ Nl, No, Pd, Pc, Po, Sc, Sm, Sk, So, or Co〉
   | 〈minus〉 
   | ... 
   | -> 〈subsequent〉*
+  | 〈chez scheme peculiar identifier〉*
+
+〈chez scheme peculiar identifier〉 → 
+    {
+  | }
 
 〈boolean〉 → 
     #t 
   | #T 
   | #f 
   | #F
+  | 〈chez scheme boolean extension〉
+
+〈chez scheme boolean extension〉 → 
+  | #true   -- case insensitive
+  | #false  -- case insensitive
 
 〈character〉 → 
     #\〈any character〉
   | #\〈character name〉
   | #\x〈hex scalar value〉
+  | 〈chez scheme small octal char〉
 
 〈character name〉 → 
     nul         -- U+0000
@@ -353,6 +352,19 @@ Nl, No, Pd, Pc, Po, Sc, Sm, Sk, So, or Co〉
   | esc         -- U+001B
   | space       -- U+0020
   | delete      -- U+007F
+  | 〈chez scheme character name〉
+
+〈chez scheme character name〉 → 
+    bel
+  | ls
+  | nel
+  | nul
+  | rubout
+  | vt
+
+-- Constraint: characters whose scalar values are less than 256
+〈chez scheme small octal char〉 → 
+    #\ 〈digit 8〉〈digit 8〉〈digit 8〉
 
 〈string〉 → 
     " 〈string element〉* "
@@ -384,6 +396,7 @@ Nl, No, Pd, Pc, Po, Sc, Sm, Sk, So, or Co〉
 
 〈num R〉 → 
     〈prefix R〉 〈complex R〉
+  | 〈chez scheme extended prefix R〉〈complex R〉
 
 〈complex R〉 → 
     〈real R〉 
@@ -429,6 +442,10 @@ Nl, No, Pd, Pc, Po, Sc, Sm, Sk, So, or Co〉
     〈radix R〉 〈exactness〉
   | 〈exactness〉 〈radix R〉
 
+〈chez scheme extended prefix R〉 → 
+  | 〈radix nR〉 〈exactness〉
+  | 〈exactness〉 〈radix nR〉
+
 〈suffix〉 → 
     〈empty〉
   | 〈exponent marker〉 〈sign〉 〈digit 10〉+
@@ -473,6 +490,11 @@ Nl, No, Pd, Pc, Po, Sc, Sm, Sk, So, or Co〉
     #x 
   | #X
 
+-- Constraint: 2 <= n <= 36
+〈radix nR〉 → 
+    #nR 
+  | #nr
+
 〈digit 2〉 → 
     0 
   | 1
@@ -481,5 +503,12 @@ Nl, No, Pd, Pc, Po, Sc, Sm, Sk, So, or Co〉
 
 〈digit 10〉 → 〈digit〉
 
-〈digit 16〉 → 〈hex digit〉
+-- Constraint: 2 <= R <= 36
+〈digit R〉 →
+    〈hex R digit〉+
+
+-- Constraint: 2 <= R <= 36
+〈hex R digit〉 →
+    〈if `R` <= 10, 〈digit〉 from 0 to `R` minus 1〉
+  | 〈if `R` > 10, case-insensitive `a` to the letter corresponding to `R` minus 10〉
 ```
