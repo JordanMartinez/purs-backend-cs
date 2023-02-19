@@ -52,8 +52,8 @@ Note: while the lexical and datum syntax have formal accounts, the program synta
 
 ```
 (library 〈library name〉
-  (export 〈export spec〉+ )      -- Unclear if this should be `+` or `*`. I assume `+` else library can't be used.
-  (import 〈import spec〉+ )      -- Unclear if this should be `+` or `*`. I'm not yet sure if one can do anything with no imports.
+  (export 〈export spec〉* )
+  (import 〈import spec〉* )
   〈library body〉)
 
 〈library name〉 → 
@@ -61,18 +61,18 @@ Note: while the lexical and datum syntax have formal accounts, the program synta
 
 〈version〉 → 
     〈empty〉
-  | (〈sub-version〉+ )
+  | (〈sub-version〉* )
 
 〈sub-version〉 → 
     〈nonZeroDigit〉〈digit〉+
 
 〈export spec〉 →
     〈identifier〉
-  | (rename (〈identifier〉 〈identifier〉)+ )
+  | (rename (〈identifier〉 〈identifier〉)* )
 
 〈import spec〉 →
     〈import set〉
-  | (for 〈import set〉 〈import level〉+ )
+  | (for 〈import set〉 〈import level〉* )
 
 -- Constraint: 
 -- A 〈library reference〉 whose first 〈identifier〉 is 
@@ -83,10 +83,10 @@ Note: while the lexical and datum syntax have formal accounts, the program synta
 〈import set〉 →
     〈library reference〉
   | (library 〈library reference〉)
-  | (only 〈import set〉 〈identifier〉+ )
-  | (except 〈import set〉 〈identifier〉+ )
+  | (only 〈import set〉 〈identifier〉* )
+  | (except 〈import set〉 〈identifier〉* )
   | (prefix 〈import set〉 〈identifier〉)
-  | (rename 〈import set〉 (〈identifier1〉 〈identifier2〉)+ )
+  | (rename 〈import set〉 (〈identifier1〉 〈identifier2〉)* )
 
 〈library reference〉 →
     (〈identifier〉+ )
@@ -102,8 +102,8 @@ Note: while the lexical and datum syntax have formal accounts, the program synta
     〈sub-version〉
   | (>= 〈sub-version〉)
   | (<= 〈sub-version〉)
-  | (and 〈sub-version reference〉 ...)
-  | (or 〈sub-version reference〉 ...)
+  | (and 〈sub-version reference〉+)
+  | (or 〈sub-version reference〉 +)
   | (not 〈sub-version reference〉)
 
 〈library body〉 →
@@ -129,7 +129,7 @@ Note: while the lexical and datum syntax have formal accounts, the program synta
     〈import form〉 〈top-level body〉
 
 〈import form〉 → 
-    (import 〈import spec〉+ )
+    (import 〈import spec〉* )
 
 〈top-level body〉 → 
     〈top-level body form〉+
