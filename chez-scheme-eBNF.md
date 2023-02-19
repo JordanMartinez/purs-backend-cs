@@ -99,6 +99,110 @@ Note: while the lexical and datum syntax have formal accounts, the program synta
 〈top-level body form〉 → 
     〈definition〉
   | 〈expression〉
+
+〈definition〉 → 
+    〈definition - define〉
+  | 〈definition - define-syntax〉
+
+〈definition - define〉 → 
+    ( define 〈variable〉 〈expression〉)
+  | ( define 〈variable〉)
+  | ( define (〈variable〉〈formals〉) 〈body〉)
+  | ( define (〈variable〉.〈formals〉) 〈body〉)
+
+〈definition - define-syntax〉 → 
+    ( define-syntax 〈keyword〉 〈expression〉)
+
+〈body〉 → 
+    〈definition〉* 〈expression〉+
+
+〈expression〉 → 
+    〈primitive〉
+  | 〈quote〉
+  | 〈lambda〉
+  | 〈conditional〉
+  | 〈assignment〉
+  | 〈derived conditional〉 
+  | 〈binding construct〉 
+  | 〈sequencing〉
+
+〈primitive〉 → 
+    〈constants〉
+  | 〈variable〉
+  | 〈procedure〉
+  | 〈macro〉
+
+〈constants〉 → 
+    〈number〉
+  | 〈boolean〉
+  | 〈character〉
+  | 〈string〉
+  | 〈bytevector〉
+
+〈procedure〉 → 
+    (〈operator〉〈operand〉*)
+
+〈macro〉 → 
+    (〈keyword〉〈datum〉*)
+  | (〈keyword〉〈datum〉* . 〈datum〉)
+  | (〈keyword〉)
+  | (set!〈keyword〉〈datum〉)
+
+〈quote〉 → 
+    (quote 〈datum〉)
+  | '〈datum〉
+
+〈lambda〉 → 
+    (lambda 〈formals〉 〈body〉)
+
+〈formals〉 → 
+    (〈variable〉*)
+  | 〈variable〉
+  | (〈variable〉* . 〈variable〉)
+
+〈conditional〉 → 
+    (if 〈test〉 〈consequent〉〈alternative〉)
+  | (if 〈test〉 〈consequent〉)
+
+〈assignment〉 → 
+    set! 〈variable〉〈expression〉
+
+〈derived conditional〉 → 
+    (cond 〈conditional clause - main〉+ 〈conditional clause - else〉?)
+  | (case〈key〉〈case clause - main〉+ 〈case clause - else〉?)
+  | (and 〈test〉*)
+  | (or 〈test〉*)
+
+〈conditional clause - main〉 → 
+    (〈test〉 〈expression〉* ) -- if no expression, the `test` value is returned
+  | (〈test〉 => 〈expression〉 ) -- expression here is a procedure which is called on the value of the 〈test〉
+
+〈conditional clause - else〉 → 
+    (else 〈expression〉+)
+
+〈case clause - main〉 → 
+    ( (〈datum〉* ) 〈expression〉+ )
+
+〈case clause - else〉 → 
+    (else 〈expression〉+ )
+
+〈binding construct〉 → 
+    (let 〈bindings〉〈body〉)
+  | (let* 〈bindings〉〈body〉)
+  | (letrec 〈bindings〉〈body〉)
+  | (letrec* 〈bindings〉〈body〉)
+  | (let-values 〈Mv-bindings〉〈body〉)
+  | (let*-values 〈Mv-bindings〉〈body〉)
+
+〈bindings〉 → 
+    ((〈variable〉〈expression〉)*)
+
+〈Mv-bindings〉 → 
+    ((〈formals〉〈expression〉)*)
+
+〈sequencing〉 → 
+    (begin 〈forms〉*)
+  | (begin 〈expression〉+)
 ```
 
 ## Datum Syntax (4.3.1)
