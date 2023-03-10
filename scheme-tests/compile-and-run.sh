@@ -4,30 +4,22 @@ FILE_NAME="$1"
 SRC_DIR="scheme-tests"
 OUT_DIR="scheme-output"
 
+if [ $# -eq 0 ]; then
+  echo "Expected one argument: the file name of the scheme program to run"
+  echo "Example: 'helloworld'"
+  exit 1
+fi
+
 if [ ! -d "scheme-output" ]; then
   mkdir -p "scheme-output"
 fi
 
-echo | scheme -q << EOF
-; setup compiler flags...
-(generate-covin-files #f)
-(compile-profile #f)
-(debug-level 0)
-(cp0-effort-limit 1)
-(cp0-score-limit 1)
-(cp0-outer-unroll-limit 1)
-(compile-interpret-simple #f)
-(enable-cross-library-optimization #t)
-(generate-inspector-information #f)
-(generate-procedure-source-information #t)
-(generate-wpo-files #t)
-(generate-interrupt-trap #t)
+echo "Compiling script..."
+scheme --script "${SRC_DIR}/compile.ss" -- "${SRC_DIR}" "${OUT_DIR}" "${FILE_NAME}"
 
-; compile the program
-(compile-program "${SRC_DIR}/${FILE_NAME}.ss" "${OUT_DIR}/${FILE_NAME}.ss")
-(compile-whole-program "${OUT_DIR}/${FILE_NAME}.wpo" "${OUT_DIR}/${FILE_NAME}.wposo")
-(make-boot-file "${OUT_DIR}/${FILE_NAME}.boot" (quote ("scheme")) "${OUT_DIR}/${FILE_NAME}.wposo")
-EOF
+echo ""
+echo "Running program"
+echo ""
 
 # Tell Scheme to look inside `scheme-output` for the `helloworld.boot` file
 # The final `:` further instructs Scheme to also look in directories
